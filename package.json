@@ -2,9 +2,9 @@
 	"name": "say-hello",
 	"displayName": "say-hello",
 	"description": "",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"engines": {
-		"vscode": "^1.47.0"
+		"vscode": "^1.45.1"
 	},
 	"categories": [
 		"Other"
@@ -46,8 +46,5 @@
 	"extensionKind": [
 		"ui",
 		"workspace"
-	],
-	"engines": {
-		"vscode": "^1.45.1"
-	}
+	]
 }
