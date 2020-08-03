@@ -19,7 +19,27 @@
 				"command": "say-hello.helloWorld",
 				"title": "Hello World"
 			}
-		]
+		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "say-hello.helloWorld",
+					"when": "false"
+				}
+			],
+			"editor/title/context": [
+				{
+					"command": "say-hello.helloWorld",
+					"group": "sayhello"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "say-hello.helloWorld",
+					"group": "sayhello"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
