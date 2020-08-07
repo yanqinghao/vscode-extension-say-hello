@@ -66,5 +66,8 @@
 	"extensionKind": [
 		"ui",
 		"workspace"
-	]
+	],
+	"dependencies": {
+		"ali-oss": "^6.10.0"
+	}
 }
