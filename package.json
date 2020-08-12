@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:sp-vscode-assistant.uploadFiles"
+		"onCommand:sp-vscode-assistant.uploadFiles",
+		"*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
