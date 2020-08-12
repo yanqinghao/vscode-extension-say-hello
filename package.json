@@ -1,6 +1,6 @@
 {
-	"name": "say-hello",
-	"displayName": "say-hello",
+	"name": "sp-vscode-assistant",
+	"displayName": "sp-vscode-assistant",
 	"description": "",
 	"version": "0.2.3",
 	"engines": {
@@ -10,33 +10,33 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:say-hello.helloWorld"
+		"onCommand:sp-vscode-assistant.uploadFiles"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "say-hello.helloWorld",
-				"title": "Hello World"
+				"command": "sp-vscode-assistant.uploadFiles",
+				"title": "Sync Files"
 			}
 		],
 		"menus": {
 			"commandPalette": [
 				{
-					"command": "say-hello.helloWorld",
+					"command": "sp-vscode-assistant.uploadFiles",
 					"when": "false"
 				}
 			],
 			"editor/title/context": [
 				{
-					"command": "say-hello.helloWorld",
-					"group": "sayhello"
+					"command": "sp-vscode-assistant.uploadFiles",
+					"group": "spVscodeAssistant"
 				}
 			],
 			"explorer/context": [
 				{
-					"command": "say-hello.helloWorld",
-					"group": "sayhello"
+					"command": "sp-vscode-assistant.uploadFiles",
+					"group": "spVscodeAssistant"
 				}
 			]
 		}
@@ -50,13 +50,15 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.45.1",
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^7.0.2",
 		"@types/node": "^13.11.0",
-		"eslint": "^6.8.0",
-		"@typescript-eslint/parser": "^2.30.0",
+		"@types/request": "^2.48.5",
+		"@types/request-promise-native": "^1.0.17",
+		"@types/vscode": "^1.45.1",
 		"@typescript-eslint/eslint-plugin": "^2.30.0",
+		"@typescript-eslint/parser": "^2.30.0",
+		"eslint": "^6.8.0",
 		"glob": "^7.1.6",
 		"mocha": "^7.1.2",
 		"typescript": "^3.8.3",
@@ -68,6 +70,10 @@
 		"workspace"
 	],
 	"dependencies": {
-		"ali-oss": "^6.10.0"
+		"@types/crypto-js": "^3.1.47",
+		"ali-oss": "^6.10.0",
+		"crypto-js": "^4.0.0",
+		"request": "^2.88.2",
+		"request-promise-native": "^1.0.9"
 	}
 }
