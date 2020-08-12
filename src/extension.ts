@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('sp-vscode-assistant.uploadFiles', (uri: vscode.Uri) => {
 		// The code you place here will be executed every time your command is executed
 		console.log('Congratulations, your extension "say-hello" is now active!');
-		let spHost = (process.env.SP_HOST === undefined) ? 'sp.xuelangyun.com' : process.env.SP_HOST;
+		let spHost = (process.env.SP_HOST === undefined) ? '' : process.env.SP_HOST;
 		let spTls = (process.env.SP_HOST_TLS === 'true') ? 'https' : 'http';
 		let spAccessSecret = (process.env.SP_ACCESS_SECRET === undefined) ? '' : process.env.SP_ACCESS_SECRET;
 		let spUserId = (process.env.SP_USER_ID === undefined) ? '' : process.env.SP_USER_ID;
