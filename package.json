@@ -19,6 +19,10 @@
 			{
 				"command": "sp-vscode-assistant.uploadFiles",
 				"title": "Sync Files"
+			},
+			{
+				"command": "sp-vscode-assistant.removeFiles",
+				"title": "Remove Object on Storage"
 			}
 		],
 		"menus": {
@@ -26,17 +30,29 @@
 				{
 					"command": "sp-vscode-assistant.uploadFiles",
 					"when": "false"
+				},
+				{
+					"command": "sp-vscode-assistant.removeFiles",
+					"when": "false"
 				}
 			],
 			"editor/title/context": [
 				{
 					"command": "sp-vscode-assistant.uploadFiles",
 					"group": "spVscodeAssistant"
+				},
+				{
+					"command": "sp-vscode-assistant.removeFiles",
+					"group": "spVscodeAssistant"
 				}
 			],
 			"explorer/context": [
 				{
 					"command": "sp-vscode-assistant.uploadFiles",
+					"group": "spVscodeAssistant"
+				},
+				{
+					"command": "sp-vscode-assistant.removeFiles",
 					"group": "spVscodeAssistant"
 				}
 			]
@@ -52,6 +68,7 @@
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
+		"@types/minio": "^7.0.6",
 		"@types/mocha": "^7.0.2",
 		"@types/node": "^13.11.0",
 		"@types/request": "^2.48.5",
@@ -74,6 +91,7 @@
 		"@types/crypto-js": "^3.1.47",
 		"ali-oss": "^6.10.0",
 		"crypto-js": "^4.0.0",
+		"minio": "^7.0.16",
 		"request": "^2.88.2",
 		"request-promise-native": "^1.0.9"
 	}
