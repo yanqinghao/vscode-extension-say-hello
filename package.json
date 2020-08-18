@@ -11,6 +11,8 @@
 	],
 	"activationEvents": [
 		"onCommand:sp-vscode-assistant.uploadFiles",
+		"onCommand:sp-vscode-assistant.removeFiles",
+		"onCommand:sp-vscode-assistant.syncFiles",
 		"*"
 	],
 	"main": "./out/extension.js",
@@ -18,11 +20,15 @@
 		"commands": [
 			{
 				"command": "sp-vscode-assistant.uploadFiles",
-				"title": "Sync Files"
+				"title": "Upload Files"
 			},
 			{
 				"command": "sp-vscode-assistant.removeFiles",
 				"title": "Remove Object on Storage"
+			},
+			{
+				"command": "sp-vscode-assistant.syncFiles",
+				"title": "Sync Objects on Storage"
 			}
 		],
 		"menus": {
@@ -34,6 +40,10 @@
 				{
 					"command": "sp-vscode-assistant.removeFiles",
 					"when": "false"
+				},
+				{
+					"command": "sp-vscode-assistant.syncFiles",
+					"when": "true"
 				}
 			],
 			"editor/title/context": [
@@ -44,6 +54,10 @@
 				{
 					"command": "sp-vscode-assistant.removeFiles",
 					"group": "spVscodeAssistant"
+				},
+				{
+					"command": "sp-vscode-assistant.syncFiles",
+					"group": "spVscodeAssistant"
 				}
 			],
 			"explorer/context": [
@@ -53,6 +67,10 @@
 				},
 				{
 					"command": "sp-vscode-assistant.removeFiles",
+					"group": "spVscodeAssistant"
+				},
+				{
+					"command": "sp-vscode-assistant.syncFiles",
 					"group": "spVscodeAssistant"
 				}
 			]
