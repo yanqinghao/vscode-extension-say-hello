@@ -53,6 +53,15 @@ class StorageClient {
     this.ossPath = ossPath;
   }
 
+  async delete(filePath: string) {
+    let client: OSS | Minio.Client;
+    await this.responceBody.then(async (body) => {
+      console.log(body);
+      client = this.setClient(body);
+      await this.deleteObjs(filePath, client, body.bucket, this.ossPath);
+    });
+  }
+
   async sync(filePath: string) {
     let client: OSS | Minio.Client;
     await this.responceBody.then(async (body) => {
@@ -66,6 +75,36 @@ class StorageClient {
     });
   }
 
+  async deleteObjs(
+    filePath: string,
+    client: OSS | Minio.Client,
+    bucket: string,
+    ossPath: string
+  ) {
+    let fileName = path.parse(filePath).base;
+    if (vscode.workspace.workspaceFolders !== undefined) {
+      fileName = filePath.split(
+        vscode.workspace.workspaceFolders[0].uri.path
+      )[1];
+    }
+    const ossKey = path.join(ossPath, fileName);
+    if (client instanceof OSS) {
+      let objs = (await client.list({ "max-keys": 1000, prefix: ossKey }, {}))
+        .objects;
+      for (let obj of objs) {
+        console.log(obj);
+        if (!obj.name.endsWith("/")) {
+          client.delete(obj.name);
+        }
+      }
+    } else {
+      client.listObjectsV2(bucket, ossKey, true).on("data", (obj) => {
+        console.log(obj);
+        client.removeObject(bucket, obj.name);
+      });
+    }
+  }
+
   async syncFolder(
     filePath: string,
     client: OSS | Minio.Client,
@@ -73,10 +112,10 @@ class StorageClient {
     ossPath: string
   ) {
     await this.putFolder(filePath, client, bucket, ossPath, true);
-    await this.listObjects(filePath, client, bucket, ossPath);
+    await this.getObjects(filePath, client, bucket, ossPath);
   }
 
-  async listObjects(
+  async getObjects(
     filePath: string,
     client: OSS | Minio.Client,
     bucket: string,
@@ -457,6 +496,29 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  let disposableOndel = vscode.workspace.onDidDeleteFiles(async (e) => {
+    // The code you place here will be executed every time your command is executed
+    console.log("on delete files plugin activate!");
+    await e.files.forEach(async (fileObj) => {
+      try {
+        await storageClient.delete(fileObj.path);
+        console.log("success to remove");
+      } catch (err) {
+        if (err.status === 403 || err.code === "InvalidAccessKeyId") {
+          try {
+            storageClient.updateAccess();
+            await storageClient.delete(fileObj.path);
+            console.log("success to remove");
+          } catch (err) {
+            console.log("fail to remove");
+          }
+        } else {
+          console.log("fail to remove");
+        }
+      }
+    });
+  });
+
   let disposableSync = vscode.commands.registerCommand(
     "sp-vscode-assistant.syncFiles",
     async (uri: vscode.Uri) => {
@@ -500,6 +562,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposablePut);
   context.subscriptions.push(disposableRemove);
   context.subscriptions.push(disposableOnsave);
+  context.subscriptions.push(disposableOndel);
   context.subscriptions.push(disposableSync);
 }
 
