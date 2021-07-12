@@ -85,6 +85,7 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
+		"@types/ali-oss": "^6.0.9",
 		"@types/glob": "^7.1.1",
 		"@types/minio": "^7.0.6",
 		"@types/mocha": "^7.0.2",
