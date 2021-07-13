@@ -56,7 +56,6 @@ class StorageClient {
   async delete(filePath: string) {
     let client: OSS | Minio.Client;
     await this.responceBody.then(async (body) => {
-      console.log(body);
       client = this.setClient(body);
       await this.deleteObjs(filePath, client, body.bucket, this.ossPath);
     });
@@ -65,7 +64,6 @@ class StorageClient {
   async sync(filePath: string) {
     let client: OSS | Minio.Client;
     await this.responceBody.then(async (body) => {
-      console.log(body);
       client = this.setClient(body);
       if (fs.lstatSync(filePath).isFile()) {
         await this.putFile(filePath, client, body.bucket, this.ossPath);
@@ -92,14 +90,12 @@ class StorageClient {
       let objs = (await client.list({ "max-keys": 1000, prefix: ossKey }, {}))
         .objects;
       for (let obj of objs) {
-        console.log(obj);
         if (!obj.name.endsWith("/")) {
           client.delete(obj.name);
         }
       }
     } else {
       client.listObjectsV2(bucket, ossKey, true).on("data", (obj) => {
-        console.log(obj);
         client.removeObject(bucket, obj.name);
       });
     }
@@ -121,57 +117,57 @@ class StorageClient {
     bucket: string,
     ossPath: string
   ) {
-    let fileName = path.parse(filePath).base;
-    if (vscode.workspace.workspaceFolders !== undefined) {
-      fileName = filePath.split(
-        vscode.workspace.workspaceFolders[0].uri.path
-      )[1];
-    }
-    const ossKey = path.join(ossPath, fileName);
-    if (client instanceof OSS) {
-      let objs = (await client.list({ "max-keys": 1000, prefix: ossKey }, {}))
-        .objects;
-      for (let obj of objs) {
-        console.log(obj);
-        let fileName = path.join(filePath, obj.name.split(ossKey)[1]);
-        if (vscode.workspace.workspaceFolders !== undefined) {
-          fileName = path.join(
-            vscode.workspace.workspaceFolders[0].uri.path,
-            obj.name.split(ossKey)[1]
-          );
+    if (filePath.startsWith("/code/")) {
+      let fileName = path.parse(filePath).base;
+      if (vscode.workspace.workspaceFolders !== undefined) {
+        fileName = filePath.split(
+          vscode.workspace.workspaceFolders[0].uri.path
+        )[1];
+      }
+      const ossKey = path.join(ossPath, fileName);
+      if (client instanceof OSS) {
+        let objs = (await client.list({ "max-keys": 1000, prefix: ossKey }, {}))
+          .objects;
+        for (let obj of objs) {
+          let fileName = path.join(filePath, obj.name.split(ossKey)[1]);
+          if (vscode.workspace.workspaceFolders !== undefined) {
+            fileName = path.join(
+              vscode.workspace.workspaceFolders[0].uri.path,
+              obj.name.split(ossKey)[1]
+            );
+          }
+          if (!obj.name.endsWith("/")) {
+            if (fs.existsSync(fileName)) {
+              vscode.window.showInformationMessage(`file ${fileName} already exists.`);
+            } else {
+              let folderName = path.parse(fileName).dir;
+              if (!fs.existsSync(folderName)) {
+                fs.mkdirSync(folderName, { recursive: true });
+              }
+              client.get(obj.name, fileName);
+            }
+          }
         }
-        if (!obj.name.endsWith("/")) {
+      } else {
+        client.listObjectsV2(bucket, ossKey, true).on("data", (obj) => {
+          let fileName = path.join(filePath, obj.name.split(ossKey)[1]);
+          if (vscode.workspace.workspaceFolders !== undefined) {
+            fileName = path.join(
+              vscode.workspace.workspaceFolders[0].uri.path,
+              obj.name.split(ossKey)[1]
+            );
+          }
           if (fs.existsSync(fileName)) {
-            console.log(`file ${fileName} already exists.`);
+            vscode.window.showInformationMessage(`file ${fileName} already exists.`);
           } else {
             let folderName = path.parse(fileName).dir;
             if (!fs.existsSync(folderName)) {
               fs.mkdirSync(folderName, { recursive: true });
             }
-            client.get(obj.name, fileName);
+            client.fGetObject(bucket, obj.name, fileName);
           }
-        }
+        });
       }
-    } else {
-      client.listObjectsV2(bucket, ossKey, true).on("data", (obj) => {
-        console.log(obj);
-        let fileName = path.join(filePath, obj.name.split(ossKey)[1]);
-        if (vscode.workspace.workspaceFolders !== undefined) {
-          fileName = path.join(
-            vscode.workspace.workspaceFolders[0].uri.path,
-            obj.name.split(ossKey)[1]
-          );
-        }
-        if (fs.existsSync(fileName)) {
-          console.log(`file ${fileName} already exists.`);
-        } else {
-          let folderName = path.parse(fileName).dir;
-          if (!fs.existsSync(folderName)) {
-            fs.mkdirSync(folderName, { recursive: true });
-          }
-          client.fGetObject(bucket, obj.name, fileName);
-        }
-      });
     }
   }
 
@@ -202,7 +198,6 @@ class StorageClient {
   async remove(filePath: string) {
     let client: OSS | Minio.Client;
     await this.responceBody.then(async (body) => {
-      console.log(body);
       client = this.setClient(body);
       if (fs.lstatSync(filePath).isFile()) {
         await this.removeFile(filePath, client, body.bucket, this.ossPath);
@@ -215,7 +210,6 @@ class StorageClient {
   async put(filePath: string) {
     let client: OSS | Minio.Client;
     await this.responceBody.then(async (body) => {
-      console.log(body);
       client = this.setClient(body);
       if (fs.lstatSync(filePath).isFile()) {
         await this.putFile(filePath, client, body.bucket, this.ossPath);
@@ -244,17 +238,19 @@ class StorageClient {
     bucket: string,
     ossPath: string
   ) {
-    let fileName = path.parse(filePath).base;
-    if (vscode.workspace.workspaceFolders !== undefined) {
-      fileName = filePath.split(
-        vscode.workspace.workspaceFolders[0].uri.path
-      )[1];
-    }
-    const ossKey = path.join(ossPath, fileName);
-    if (client instanceof OSS) {
-      await client.delete(ossKey);
-    } else {
-      await client.removeObject(bucket, ossKey);
+    if (filePath.startsWith("/code/")) {
+      let fileName = path.parse(filePath).base;
+      if (vscode.workspace.workspaceFolders !== undefined) {
+        fileName = filePath.split(
+          vscode.workspace.workspaceFolders[0].uri.path
+        )[1];
+      }
+      const ossKey = path.join(ossPath, fileName);
+      if (client instanceof OSS) {
+        await client.delete(ossKey);
+      } else {
+        await client.removeObject(bucket, ossKey);
+      }
     }
   }
 
@@ -279,26 +275,28 @@ class StorageClient {
     ossPath: string,
     checksize = false
   ) {
-    let fileName = path.parse(filePath).base;
-    if (vscode.workspace.workspaceFolders !== undefined) {
-      fileName = filePath.split(
-        vscode.workspace.workspaceFolders[0].uri.path
-      )[1];
-    }
-    const ossKey = path.join(ossPath, fileName);
-    if (checksize) {
-      if (fs.statSync(filePath).size < 204800) {
+    if (filePath.startsWith("/code/")) {
+      let fileName = path.parse(filePath).base;
+      if (vscode.workspace.workspaceFolders !== undefined) {
+        fileName = filePath.split(
+          vscode.workspace.workspaceFolders[0].uri.path
+        )[1];
+      }
+      const ossKey = path.join(ossPath, fileName);
+      if (checksize) {
+        if (fs.statSync(filePath).size < 204800) {
+          if (client instanceof OSS) {
+            await client.put(ossKey, filePath);
+          } else {
+            await client.fPutObject(bucket, ossKey, filePath, {});
+          }
+        }
+      } else {
         if (client instanceof OSS) {
           await client.put(ossKey, filePath);
         } else {
           await client.fPutObject(bucket, ossKey, filePath, {});
         }
-      }
-    } else {
-      if (client instanceof OSS) {
-        await client.put(ossKey, filePath);
-      } else {
-        await client.fPutObject(bucket, ossKey, filePath, {});
       }
     }
   }
@@ -410,18 +408,18 @@ export async function activate(context: vscode.ExtensionContext) {
     let filePath = vscode.workspace.workspaceFolders[0].uri.path;
     try {
       await storageClient.sync(filePath);
-      console.log("success to init files");
+      vscode.window.showInformationMessage("success to init files");
     } catch (err) {
       if (err.status === 403 || err.code === "InvalidAccessKeyId") {
         try {
           storageClient.updateAccess();
           await storageClient.sync(filePath);
-          console.log("success to init files");
+          vscode.window.showInformationMessage("success to init files");
         } catch (err) {
-          console.log("fail to init files");
+          vscode.window.showInformationMessage("fail to init files");
         }
       } else {
-        console.log("fail to init files");
+        vscode.window.showInformationMessage("fail to init files");
       }
     }
   }
@@ -429,8 +427,6 @@ export async function activate(context: vscode.ExtensionContext) {
   let disposablePut = vscode.commands.registerCommand(
     "sp-vscode-assistant.uploadFiles",
     async (uri: vscode.Uri) => {
-      // The code you place here will be executed every time your command is executed
-      console.log("upload files plugin activate!");
       try {
         await storageClient.put(uri.fsPath);
         vscode.window.showInformationMessage("success to upload");
@@ -453,9 +449,6 @@ export async function activate(context: vscode.ExtensionContext) {
   let disposableRemove = vscode.commands.registerCommand(
     "sp-vscode-assistant.removeFiles",
     async (uri: vscode.Uri) => {
-      // The code you place here will be executed every time your command is executed
-      console.log("remove files plugin activate!");
-
       try {
         await storageClient.remove(uri.fsPath);
         vscode.window.showInformationMessage("success to remove");
@@ -476,8 +469,6 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   let disposableOnsave = vscode.workspace.onDidSaveTextDocument((e) => {
-    // The code you place here will be executed every time your command is executed
-    console.log("on save files plugin activate!");
     try {
       storageClient.put(e.uri.path);
       console.log("success to upload");
@@ -497,23 +488,21 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   let disposableOndel = vscode.workspace.onDidDeleteFiles(async (e) => {
-    // The code you place here will be executed every time your command is executed
-    console.log("on delete files plugin activate!");
     await e.files.forEach(async (fileObj) => {
       try {
         await storageClient.delete(fileObj.path);
-        console.log("success to remove");
+        vscode.window.showInformationMessage("success to remove");
       } catch (err) {
         if (err.status === 403 || err.code === "InvalidAccessKeyId") {
           try {
             storageClient.updateAccess();
             await storageClient.delete(fileObj.path);
-            console.log("success to remove");
+            vscode.window.showInformationMessage("success to remove");
           } catch (err) {
-            console.log("fail to remove");
+            vscode.window.showInformationMessage("fail to remove");
           }
         } else {
-          console.log("fail to remove");
+          vscode.window.showInformationMessage("fail to remove");
         }
       }
     });
@@ -522,8 +511,6 @@ export async function activate(context: vscode.ExtensionContext) {
   let disposableSync = vscode.commands.registerCommand(
     "sp-vscode-assistant.syncFiles",
     async (uri: vscode.Uri) => {
-      // The code you place here will be executed every time your command is executed
-      console.log("sync files plugin activate!");
       let filePath: string | undefined;
 
       if (typeof uri === "undefined") {
