@@ -2,7 +2,7 @@
 	"name": "sp-vscode-assistant",
 	"displayName": "sp-vscode-assistant",
 	"description": "",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"engines": {
 		"vscode": "^1.45.1"
 	},
